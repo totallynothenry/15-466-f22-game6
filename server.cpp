@@ -94,7 +94,6 @@ int main(int argc, char **argv) {
 						do {
 							handled_message = false;
 							if (player.controls.recv_controls_message(c)) handled_message = true;
-							//TODO: extend for more message types as needed
 						} while (handled_message);
 					} catch (std::exception const &e) {
 						std::cout << "Disconnecting client:" << e.what() << std::endl;

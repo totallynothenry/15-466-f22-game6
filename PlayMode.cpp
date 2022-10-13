@@ -101,6 +101,19 @@ void PlayMode::update(float elapsed) {
 	}, 0.0);
 }
 
+inline glm::u8vec4 get_color(PlayerType type) {
+	switch (type) {
+	case PLAYER_0:
+		return glm::u8vec4(0xff, 0x0, 0x0, 0xff); // Red
+	case PLAYER_1:
+		return glm::u8vec4(0x0, 0x0, 0xff, 0xff); // Blue
+	default:
+		//Assume NEUTRAL
+		return glm::u8vec4(0xff, 0xff, 0xff, 0xff); // White
+	}
+}
+
+
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	static std::array< glm::vec2, 16 > const circle = [](){
@@ -115,7 +128,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
-	
+
 	//figure out view transform to center the arena:
 	float aspect = float(drawable_size.x) / float(drawable_size.y);
 	float scale = std::min(
@@ -147,35 +160,80 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 				glm::u8vec4(0xff, 0xff, 0xff, 0x00));
 		};
 
-		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMin.y, 0.0f), glm::u8vec4(0xff, 0x00, 0xff, 0xff));
-		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMax.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMax.y, 0.0f), glm::u8vec4(0xff, 0x00, 0xff, 0xff));
-		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMin.x, Game::ArenaMax.y, 0.0f), glm::u8vec4(0xff, 0x00, 0xff, 0xff));
-		lines.draw(glm::vec3(Game::ArenaMax.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMax.y, 0.0f), glm::u8vec4(0xff, 0x00, 0xff, 0xff));
+		(void)draw_text;
 
-		for (auto const &player : game.players) {
-			glm::u8vec4 col = glm::u8vec4(player.color.x*255, player.color.y*255, player.color.z*255, 0xff);
-			if (&player == &game.players.front()) {
-				//mark current player (which server sends first):
-				lines.draw(
-					glm::vec3(player.position + Game::PlayerRadius * glm::vec2(-0.5f,-0.5f), 0.0f),
-					glm::vec3(player.position + Game::PlayerRadius * glm::vec2( 0.5f, 0.5f), 0.0f),
-					col
-				);
-				lines.draw(
-					glm::vec3(player.position + Game::PlayerRadius * glm::vec2(-0.5f, 0.5f), 0.0f),
-					glm::vec3(player.position + Game::PlayerRadius * glm::vec2( 0.5f,-0.5f), 0.0f),
-					col
-				);
-			}
+		static constexpr glm::u8vec4 purple = glm::u8vec4(0xff, 0x00, 0xff, 0xff);
+		static constexpr glm::u8vec4 yellow = glm::u8vec4(0xff, 0xe8, 0x00, 0xff);
+		static constexpr glm::u8vec4 white = glm::u8vec4(0xff, 0xff, 0xff, 0xff);
+
+		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMin.y, 0.0f), purple);
+		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMax.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMax.y, 0.0f), purple);
+
+		//center line
+		lines.draw(glm::vec3(Game::ArenaMin.x, 0.0f, 0.0f), glm::vec3(Game::ArenaMax.x, 0.0f, 0.0f), yellow);
+
+		//neutral zone
+		lines.draw(glm::vec3(Game::ArenaMin.x, Game::Player0Max, 0.0f), glm::vec3(Game::ArenaMax.x, Game::Player0Max, 0.0f), white);
+		lines.draw(glm::vec3(Game::ArenaMin.x, Game::Player1Min, 0.0f), glm::vec3(Game::ArenaMax.x, Game::Player1Min, 0.0f), white);
+
+		//goals
+		lines.draw(glm::vec3(-Game::GoalRadius, Game::ArenaMin.y, 0.0f), glm::vec3(-Game::GoalRadius, Game::ArenaMin.y - 0.1f, 0.0f), white);
+		lines.draw(glm::vec3( Game::GoalRadius, Game::ArenaMin.y, 0.0f), glm::vec3( Game::GoalRadius, Game::ArenaMin.y - 0.1f, 0.0f), white);
+		lines.draw(glm::vec3(-Game::GoalRadius, Game::ArenaMax.y, 0.0f), glm::vec3(-Game::GoalRadius, Game::ArenaMax.y + 0.1f, 0.0f), white);
+		lines.draw(glm::vec3( Game::GoalRadius, Game::ArenaMax.y, 0.0f), glm::vec3( Game::GoalRadius, Game::ArenaMax.y + 0.1f, 0.0f), white);
+		for (uint32_t a = 0; a < circle.size(); ++a) {
+			glm::vec2 pos1 = Game::Goal0Center + Game::GoalRadius * circle[a];
+			glm::vec2 pos2 = Game::Goal0Center + Game::GoalRadius * circle[(a+1)%circle.size()];
+			if (pos1.y < Game::ArenaMin.y || pos2.y < Game::ArenaMin.y) continue;
+			lines.draw(glm::vec3(pos1, 0.0f), glm::vec3(pos2, 0.0f), white);
+		}
+		for (uint32_t a = 0; a < circle.size(); ++a) {
+			glm::vec2 pos1 = Game::Goal1Center + Game::GoalRadius * circle[a];
+			glm::vec2 pos2 = Game::Goal1Center + Game::GoalRadius * circle[(a+1)%circle.size()];
+			if (pos1.y > Game::ArenaMax.y || pos2.y > Game::ArenaMax.y) continue;
+			lines.draw(glm::vec3(pos1, 0.0f), glm::vec3(pos2, 0.0f), white);
+		}
+
+
+		lines.draw(glm::vec3(Game::ArenaMin.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMin.x, Game::ArenaMax.y, 0.0f), purple);
+		lines.draw(glm::vec3(Game::ArenaMax.x, Game::ArenaMin.y, 0.0f), glm::vec3(Game::ArenaMax.x, Game::ArenaMax.y, 0.0f), purple);
+
+		//draw player 0
+		glm::u8vec4 col_0 = get_color(game.player_0.type);
+		for (uint32_t a = 0; a < circle.size(); ++a) {
+			lines.draw(
+				glm::vec3(game.player_0.position + Game::PlayerRadius * circle[a], 0.0f),
+				glm::vec3(game.player_0.position + Game::PlayerRadius * circle[(a+1)%circle.size()], 0.0f),
+				col_0
+			);
+		}
+		draw_text(glm::vec2(0.8f, -0.35f), std::to_string(game.player_0.score), 0.1f);
+
+		//draw player 1
+		glm::u8vec4 col_1 = get_color(game.player_1.type);
+		for (uint32_t a = 0; a < circle.size(); ++a) {
+			lines.draw(
+				glm::vec3(game.player_1.position + Game::PlayerRadius * circle[a], 0.0f),
+				glm::vec3(game.player_1.position + Game::PlayerRadius * circle[(a+1)%circle.size()], 0.0f),
+				col_1
+			);
+		}
+		draw_text(glm::vec2(0.8f, 0.25f), std::to_string(game.player_1.score), 0.1f);
+
+		for (auto const &puck : game.pucks) {
+			glm::u8vec4 col = get_color(puck.last_hit);
 			for (uint32_t a = 0; a < circle.size(); ++a) {
 				lines.draw(
-					glm::vec3(player.position + Game::PlayerRadius * circle[a], 0.0f),
-					glm::vec3(player.position + Game::PlayerRadius * circle[(a+1)%circle.size()], 0.0f),
+					glm::vec3(puck.position + Game::PuckRadius * circle[a], 0.0f),
+					glm::vec3(puck.position + Game::PuckRadius * circle[(a+1)%circle.size()], 0.0f),
 					col
 				);
 			}
+		}
 
-			draw_text(player.position + glm::vec2(0.0f, -0.1f + Game::PlayerRadius), player.name, 0.09f);
+		if (game.grace_period > 0.0f) {
+			int num = static_cast< int >(std::ceil(game.grace_period));
+			draw_text(glm::vec2(-0.1f, -0.2f), std::to_string(num), 0.5f);
 		}
 	}
 	GL_ERRORS();
