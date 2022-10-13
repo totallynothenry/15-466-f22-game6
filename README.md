@@ -39,7 +39,7 @@ Since the game has a fixed player count, it is no longer necessary to send the c
 
 Each player controls a mallets  with `W` `A` `S` `D` keys. The objective is to score goals on the opponent. The score is displayed on the right side of the table. Players can agree on their own Best-Of-X rule for who is the winner.
 
-The strategy of the game is very similar to normal air hockey in that you want to strike the puck in a direction that sends it around the opponent's mallet and into their goal. However, defense in quantum air hockey is slightly different. Since all puck copies collapse when any single one is struck, one can often prevent goals by aggressively striking the nearest copy.
+The strategy of the game is very similar to normal air hockey in that you want to strike the puck in a direction that sends it around the opponent's mallet and into their goal. However, defense in quantum air hockey is slightly different. Since all puck copies collapse when any single one is struck, one can often prevent goals by aggressively striking the nearest copy. It is for this reason why the mallets cannot move past the while lines on the board: otherwise, player can end up in a standoff where the puck is stuck between them and it is disadvantageous for either to move away.
 
 # Sources:
 
