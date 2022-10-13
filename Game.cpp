@@ -9,7 +9,7 @@
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define LOG(ARGS) std::cout << ARGS << std::endl;
@@ -385,7 +385,7 @@ void Game::handle_scored(Puck *scored, PlayerType type) {
 		break;
 	default:
 		//if one of the players is not connected, always have puck spawn for other player
-		to_serve == player_1.type == NEUTRAL ? PLAYER_0 : PLAYER_1;
+		to_serve = player_1.type == NEUTRAL ? PLAYER_0 : PLAYER_1;
 	}
 }
 
