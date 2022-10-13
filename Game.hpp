@@ -108,9 +108,6 @@ struct Game {
 	Player *spawn_player(); //adopt of one the two players
 	void remove_player(Player *); //release control of one of the two players
 
-	Player *Game::assume_player(PlayerType type);
-	void Game::release_player(PlayerType type);
-
 	PlayerType next_player = PLAYER_0; //used player spawning
 	PlayerType to_serve = PLAYER_0; //used for goal resets
 	float grace_period = 0.0f; //grace period after scoring where neither player can move

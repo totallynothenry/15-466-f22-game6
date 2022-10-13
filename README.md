@@ -12,7 +12,7 @@ Players:
 
 Pucks:
 5. Like with normal air hockey, players use their mallets to strike a puck to move it.
-6. Unlike normal air hockey, the puck fans out 5 copies when struck.
+6. Unlike normal air hockey, the puck fans out 5 copies when struck. For visual fun, the puck becomes the color of the player that last struck it.
 7. When any puck copy hits a mallet or scores a goal, an "observation" is made and all copies "collapse" into a single puckl. To prevent frustration, the puck chosen for collapse is always the puck that scored or was struck by a mallet.
 
 Goal scoring:
