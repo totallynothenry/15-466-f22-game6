@@ -2,7 +2,9 @@
 
 ## Author: Henry Du
 
-## Design: This game is a variant of air hockey with some Uncertainty Principle flavoring.
+## Design:
+
+This game is a variant of air hockey with some an "Uncertainty Principle" spin (no pun intended).
 
 Players:
 1. There are two players, each controlling a mallet.
